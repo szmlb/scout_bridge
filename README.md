@@ -125,24 +125,18 @@ python3 -c "import socket; s=socket.create_connection(('<scout-host>', 9090), 5)
 
 ## Part 2 — Remote PC Setup (ROS 2 side)
 
-Tested on Ubuntu 24.04 with ROS 2 Jazzy. Scout must be reachable on port 9090 from the remote PC (Tailscale, LAN, or any routable network).
+Tested on Ubuntu 24.04 with ROS 2 Jazzy. Scout must be reachable on port 9090 from the remote PC (LAN or any routable network).
 
 ### 2-1. Install roslibpy
 
-ROS 2 uses the system Python. Do **not** install roslibpy inside a conda environment.
-
 ```bash
-# Install pip for system Python if not present
-curl -s https://bootstrap.pypa.io/get-pip.py | python3 - --user --break-system-packages
-
-# Install roslibpy
-~/.local/bin/pip install roslibpy --break-system-packages
+pip3 install roslibpy
 ```
 
-Verify it is importable by the system Python:
+Verify:
 
 ```bash
-/usr/bin/python3 -c "import roslibpy; print(roslibpy.__version__)"
+python3 -c "import roslibpy; print(roslibpy.__version__)"
 ```
 
 ### 2-2. Build the package
@@ -151,11 +145,9 @@ Verify it is importable by the system Python:
 cd ~/ros2_ws          # or wherever your ROS 2 workspace is
 git clone https://github.com/szmlb/scout_bridge src/scout_bridge
 source /opt/ros/jazzy/setup.bash
-COLCON_PYTHON_EXECUTABLE=/usr/bin/python3 colcon build --packages-select scout_bridge
+colcon build --packages-select scout_bridge
 source install/setup.bash
 ```
-
-> **Note:** If conda is active during build, the wrong Python may be picked up. Either deactivate conda first or set `COLCON_PYTHON_EXECUTABLE=/usr/bin/python3` as shown above.
 
 ---
 
@@ -170,10 +162,10 @@ source ~/ros2_ws/install/setup.bash
 ros2 launch scout_bridge scout_bridge.launch.py
 ```
 
-With a custom host (e.g., Tailscale IP instead of hostname):
+With an IP address instead of hostname:
 
 ```bash
-ros2 launch scout_bridge scout_bridge.launch.py scout_host:=100.x.x.x
+ros2 launch scout_bridge scout_bridge.launch.py scout_host:=192.168.x.x
 ```
 
 ### Send a velocity command
@@ -231,7 +223,7 @@ The `scout_side/` directory contains the files deployed to the Scout. They are i
 | rosbridge port not open on Scout | `ssh root@<scout-host> "ss -tlnp | grep 9090"` |
 | rosbridge service failed to start | `ssh root@<scout-host> "journalctl -u rosbridge -n 50"` |
 | rosmaster not running on Scout | `ssh root@<scout-host> "pgrep -x rosmaster"` — restart `roller_eye.service` |
-| `roslibpy` not found when building | Confirm `/usr/bin/python3 -c "import roslibpy"` works; do not use conda Python |
+| `roslibpy` not found when building | Confirm `python3 -c "import roslibpy"` works; ensure it is installed for the system Python used by ROS 2 |
 | Wrong axis response from Scout | Verify the axis mapping table above — Scout swaps `linear.x` and `linear.y` |
 
 ## Known Limitations
