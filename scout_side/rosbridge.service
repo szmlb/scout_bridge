@@ -1,0 +1,24 @@
+[Unit]
+Description=ROS1 rosbridge minimal WebSocket server
+After=network.target roller_eye.service tailscaled.service
+Wants=roller_eye.service
+
+[Service]
+Type=simple
+User=root
+Environment="ROS_ROOT=/opt/ros/melodic/share/ros"
+Environment="ROS_PACKAGE_PATH=/opt/ros/melodic/share:/opt/ros/melodic/stacks"
+Environment="ROS_MASTER_URI=http://localhost:11311"
+Environment="PYTHONPATH=/opt/ros/melodic/lib/python2.7/dist-packages"
+Environment="PATH=/opt/ros/melodic/bin:/usr/bin:/bin"
+Environment="LD_LIBRARY_PATH=/opt/ros/melodic/lib"
+Environment="HOME=/root"
+ExecStartPre=/bin/sleep 5
+ExecStart=/opt/ros_launch/start_rosbridge.sh
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
